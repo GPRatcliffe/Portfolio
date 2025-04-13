@@ -1,18 +1,37 @@
+import { useMemo } from "react";
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
-  ContactShadows,
+  KeyboardControls,
+  KeyboardControlsEntry,
   OrbitControls,
-  OrthographicCamera,
 } from "@react-three/drei";
-import { Model } from "@/components/layout/layout.component";
-import * as THREE from "three";
-import OrthoCamera from "@/components/OrthoCamera/OrthoCamera.component";
-import User from "@/components/User/User.component";
-import Lighting from "@/components/Lighting/Lighting.component";
+import { Model } from "@/components/layout/layout";
+import User from "@/components/User/User";
+import Lighting from "@/components/Lighting/Lighting";
 
-export default function Home() {
+import { Physics } from "@react-three/rapier";
+import { Perf } from "r3f-perf";
+
+enum Controls {
+  forward = "forward",
+  backward = "backward",
+  left = "left",
+  right = "right",
+  jump = "jump",
+}
+
+const Home = () => {
+  const map = useMemo<KeyboardControlsEntry<Controls>[]>(
+    () => [
+      { name: Controls.forward, keys: ["ArrowUp", "KeyW"] },
+      { name: Controls.backward, keys: ["ArrowDown", "KeyS"] },
+      { name: Controls.left, keys: ["ArrowLeft", "KeyA"] },
+      { name: Controls.right, keys: ["ArrowRight", "KeyD"] },
+      { name: Controls.jump, keys: ["Space"] },
+    ],
+    []
+  );
   return (
     <>
       <Head>
@@ -25,17 +44,23 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Canvas shadows>
-          <OrthoCamera />
-          <OrbitControls enableRotate={false} enableZoom={false} />
-          <gridHelper />
+        <KeyboardControls map={map}>
+          <Canvas shadows>
+            <OrbitControls enableRotate={false} enableZoom={false} />
 
-          <Lighting />
+            <Lighting />
 
-          <Model />
-          <User />
-        </Canvas>
+            <Perf />
+
+            <Physics gravity={[0, -30, 0]}>
+              <Model />
+              <User />
+            </Physics>
+          </Canvas>
+        </KeyboardControls>
       </main>
     </>
   );
-}
+};
+
+export default Home;
